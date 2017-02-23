@@ -39,33 +39,31 @@ static struct miscdevice pseudohsm_dev = {
 };
 
 static int disable_cache(void) {
-    printk(KERN_ALERT "Disabling L1 and L2 caches.\n");
-    /*__asm__(".intel_syntax noprefix\n\t"
-            "mov    eax,cr0\n\t"
-            "or     eax,(1 << 30)\n\t"
-            "mov    cr0,eax\n\t"
+    printk(KERN_INFO "PseudoHSM: Disabling L1 and L2 caches.\n");
+    __asm__("mov    %%cr0, %%rax\n\t"
+            "or     $(1 << 30), %%rax\n\t"
+            "mov    %%rax, %%cr0\n\t"
             "wbinvd\n\t"
-            ".att_syntax noprefix\n\t"
-    : : : "eax" );*/
+    : : : "rax" );
     return 0;
 }
 static void enable_cache(void) {
-    printk(KERN_ALERT "Enabling L1 and L2 caches.\n");
-    /*__asm__(".intel_syntax noprefix\n\t"
-            "mov    eax,cr0\n\t"
-            "and     eax,~(1 << 30)\n\t"
-            "mov    cr0,eax\n\t"
+    printk(KERN_INFO "PseudoHSM: Enabling L1 and L2 caches.\n");
+    __asm__("mov    %%cr0, %%rax\n\t"
+            "and    $~(1 << 30), %%rax\n\t"
+            "mov    %%rax, %%cr0\n\t"
             "wbinvd\n\t"
-            ".att_syntax noprefix\n\t"
-    : : : "eax" );*/
+    : : : "rax" );
 }
 
 static ssize_t toggle_cache(struct file* file, const char * buf, size_t count, loff_t *ppos) {
     if(count != 1) {
+        printk(KERN_ALERT "PseudoHSM::toggle_cache: count != 1\n");
         return -EMSGSIZE;
     }
     switch(*buf) {
         default:
+            printk(KERN_ALERT "PseudoHSM::toggle_cache: unexpected command %c\n", *buf);
             return -EBADRQC;
         case '0':
             disable_cache();
