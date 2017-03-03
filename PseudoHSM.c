@@ -57,11 +57,15 @@ static void enable_cache(void) {
 }
 
 static ssize_t toggle_cache(struct file* file, const char * buf, size_t count, loff_t *ppos) {
+    char tmp;
     if(count != 1) {
         printk(KERN_ALERT "PseudoHSM::toggle_cache: count != 1\n");
         return -EMSGSIZE;
     }
-    switch(*buf) {
+    if(copy_from_user(&tmp, buf, 1) != 0) {
+        return -EFAULT;
+    }
+    switch(tmp) {
         default:
             printk(KERN_ALERT "PseudoHSM::toggle_cache: unexpected command %c\n", *buf);
             return -EBADRQC;
@@ -85,12 +89,13 @@ static char is_cache_enabled(void) {
 }
 
 static ssize_t read_cache(struct file* file, char * buf, size_t count, loff_t *ppos) {
+    char tmp;
     if(*ppos == 0) {
         ++*ppos;
         if(count >= 1) {
-            buf[0] = is_cache_enabled();
-            printk("PseudoHSM::read_cache: reading %d\n", buf[0]);
-            return 1;
+            tmp = is_cache_enabled();
+            printk("PseudoHSM::read_cache: reading %d\n", tmp);
+            return copy_to_user(buf, &tmp, 1) == 0 ? 1 : -EFAULT;
         } else {
             printk("PseudoHSM::read_cache: count was 0\n");
             return 0;
