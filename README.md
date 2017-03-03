@@ -10,12 +10,18 @@ To remove:
 sudo rmmod PseudoHSM
 ```
 ## Cache enable/disable
+### Writing to the cache control bit
 ```sh
-sudo sh -c 'echo -n 0 > /dev/set_cpu_cache' # disable
-sudo sh -c 'echo -n 1 > /dev/set_cpu_cache' # enable
+sudo sh -c 'echo -n 0 > /dev/cachectl' # disable
+sudo sh -c 'echo -n 1 > /dev/cachectl' # enable
 ```
+### Reading the cache control bit
+```sh
+sudo sh -c 'xxd /dev/cachectl'
+```
+
 - no noticable slowdown in QEMU-KVM, either that doesn't emulate cache, or this is broken
-- TODO: implement `file_operations::read`
+- Tested reading in QEMU, reading `/dev/cachectl` always shows 1 (even after setting it to 0)
 - TODO: test in Bochs?
 
 ## Encryption

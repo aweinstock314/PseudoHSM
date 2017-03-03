@@ -74,13 +74,41 @@ static ssize_t toggle_cache(struct file* file, const char * buf, size_t count, l
     }
 }
 
+static unsigned long int get_controlflags(void) {
+    register unsigned long int ret asm("rax");
+    __asm__("mov    %%cr0, %%rax\n\t" : : : "rax" );
+    return ret;
+}
+
+static char get_cacheflag(void) {
+    return !!(get_controlflags() & (1<<30));
+}
+
+static ssize_t read_cache(struct file* file, char * buf, size_t count, loff_t *ppos) {
+    if(*ppos == 0) {
+        ++*ppos;
+        if(count >= 1) {
+            buf[0] = get_cacheflag();
+            printk("PseudoHSM::read_cache: reading %d\n", buf[0]);
+            return 1;
+        } else {
+            printk("PseudoHSM::read_cache: count was 0\n");
+            return 0;
+        }
+    } else {
+        printk("PseudoHSM::read_cache: EOF\n");
+        return 0;
+    }
+}
+
 static const struct file_operations cache_ops = {
     .owner  = THIS_MODULE,
+    .read   = read_cache,
     .write  = toggle_cache,
 };
 
 static struct miscdevice cache_dev = {
-    MISC_DYNAMIC_MINOR, "set_cpu_cache" , &cache_ops
+    MISC_DYNAMIC_MINOR, "cachectl" , &cache_ops
 };
 
 static int __init pseudohsm_init(void) {
