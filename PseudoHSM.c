@@ -80,15 +80,15 @@ static unsigned long int get_controlflags(void) {
     return ret;
 }
 
-static char get_cacheflag(void) {
-    return !!(get_controlflags() & (1<<30));
+static char is_cache_enabled(void) {
+    return !(get_controlflags() & (1<<30));
 }
 
 static ssize_t read_cache(struct file* file, char * buf, size_t count, loff_t *ppos) {
     if(*ppos == 0) {
         ++*ppos;
         if(count >= 1) {
-            buf[0] = get_cacheflag();
+            buf[0] = is_cache_enabled();
             printk("PseudoHSM::read_cache: reading %d\n", buf[0]);
             return 1;
         } else {

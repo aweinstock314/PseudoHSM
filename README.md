@@ -17,11 +17,11 @@ sudo sh -c 'echo -n 1 > /dev/cachectl' # enable
 ```
 ### Reading the cache control bit
 ```sh
-sudo sh -c 'xxd /dev/cachectl'
+sudo xxd /dev/cachectl
 ```
 
 - no noticable slowdown in QEMU-KVM, either that doesn't emulate cache, or this is broken
-- Tested reading in QEMU, reading `/dev/cachectl` always shows 1 (even after setting it to 0)
+- Tested reading in QEMU-KVM, reading `/dev/cachectl` gives consistent results with setting/clearing the cr0 bit
 - TODO: test in Bochs?
 
 ## Encryption
