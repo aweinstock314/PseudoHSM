@@ -11,8 +11,8 @@ sudo rmmod PseudoHSM
 ```
 ## Cache enable/disable
 ```sh
-sudo sh -c 'echo 0 > /dev/set_cpu_cache' # disable
-sudo sh -c 'echo 1 > /dev/set_cpu_cache' # enable
+sudo sh -c 'echo -n 0 > /dev/set_cpu_cache' # disable
+sudo sh -c 'echo -n 1 > /dev/set_cpu_cache' # enable
 ```
 - no noticable slowdown in QEMU-KVM, either that doesn't emulate cache, or this is broken
 - TODO: implement `file_operations::read`
